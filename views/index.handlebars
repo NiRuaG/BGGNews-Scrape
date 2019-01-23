@@ -1,1 +1,23 @@
-<p>test from INDEX!</p>
+<button id="scrape">Scrape</button>
+
+<script>
+
+  const $IDs = {
+    scrape
+  }
+  Object.keys($IDs).forEach(id => $IDs[id] = document.getElementById(id));
+
+  $IDs.scrape.onclick = function (event) {
+    fetch('/scrape')
+
+      .then(response => {
+        if (response.ok) {
+          return console.log("ok", response, response.json())
+        }
+        else throw response;
+      })
+
+      .catch(error => console.error("error", error));
+  }
+
+</script>

@@ -22,9 +22,12 @@ app.get('/', (req, res) => {
 });
 
 
+app.use('/scrape', require('./routes/scraper'));
+
 
 {
   const PORT = process.env.PORT || 3000;
+
   app.listen(PORT, () => {
     console.log(`App listening on http://localhost:${PORT}`);
   });
