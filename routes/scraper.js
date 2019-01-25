@@ -1,11 +1,11 @@
-const router = require('express').Router();
-const axios = require('axios');
+const router  = require('express').Router();
+const axios   = require('axios');
 const cheerio = require('cheerio');
 
 
 router.get('/', (req, res) => {
 
-  axios.get("https://boardgamegeek.com/blog/1/")
+  axios.get('https://boardgamegeek.com/blog/1/')
 
     .then(checkResponseData)
     .then(parseHTMLData)
@@ -17,11 +17,12 @@ router.get('/', (req, res) => {
       res.status(500).send("Internal Scraping Error");
     })
 
-    ; // axios.get("http://www.echojs.com/")
+    ; // axios.get(..)
 
 });
 
 module.exports = router;
+
 
 
 const checkResponseData = ({ data } = {}) => {
@@ -31,25 +32,49 @@ const checkResponseData = ({ data } = {}) => {
   throw { message: "response had no data!?", data };
 }
 
+
 const parseHTMLData = data => {
   const $ = cheerio.load(data);
 
   // // Now, we grab every h2 within an article tag, and do the following:
   const results = $("#blog_posts .blog_post").map((_index, element) => {
+    const $el = $(element);
+    
+    //* Title datum
+    const title = $el.find(".post_header .post_title").text().trim();
 
-    const title = $(element).find(".post_header .post_title").text().trim();
+    let url; { //* URL datum
+      url = $el.find(".post_header .post_title a").attr("href");
+      url = `https://boardgamegeek.com${url}`;
+    }
+    
+    //* Date datum
     // <div class="post_date">
 		// 	<span class="post_day">23</span>
 		// 	<span class="post_month">Jan</span>
 		// 	<span class="post_year">2019</span>
     // </div>
-    
-    
 
-    console.log("title:\n", title, title.length);
+    let summary; { //* Summary datum
+      //% cheerio's text() function does not preseve <br> tags as line breaks (removes them completely instead)
+      $el.find('br').replaceWith('\n');
+      summary = $el.find(".post_body .right").text().trim();
+      
+      summary = summary.substring(0, summary.indexOf('\n'));
+    }
+
+
+    // if (_index===1)
+    {
+      console.log("title:\n", title);
+      console.log("summary:\n", summary);
+      console.log("url:\n", url);
+    }
 
     return {
-      title
+      title,
+      summary,
+      url
     }
     /*  // Save an empty result object
      var result = {};
