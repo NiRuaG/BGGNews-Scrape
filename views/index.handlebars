@@ -1,5 +1,22 @@
 <button id="scrape">Scrape</button>
 
+<h1>Articles</h1>
+<div>
+  {{#each articles}}
+  <h3>{{title  }}</h3>
+  <p>{{summary}}</p>
+  <a href="{{link   }}">Link to Blog Post</a>
+    {{#each this.notes}}
+    <p>{{body}}</p>
+    {{else}}
+    <p>There are no Notes for this Article!</p>
+    {{/each}}
+  {{else}}
+  <p>There are no Articles!</p>
+  {{/each}}
+</div>
+
+
 <script>
 
   const $IDs = {
@@ -7,17 +24,22 @@
   }
   Object.keys($IDs).forEach(id => $IDs[id] = document.getElementById(id));
 
+
+
   $IDs.scrape.onclick = function (event) {
+
     fetch('/scrape')
 
-      .then(response => {
+      .then(async response => {
         if (response.ok) {
-          return console.log("ok", response, response.json())
+          await response.json();
+          location.reload();
         }
         else throw response;
       })
 
-      .catch(error => console.error("error", error));
+      .catch(error => console.error("fetch error", error));
+
   }
 
 </script>
