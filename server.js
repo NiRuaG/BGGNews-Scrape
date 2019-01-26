@@ -3,6 +3,7 @@ const app = express();
 
 
 const db = require('./config/mongoose');
+const { Article } = require('./models');
 
 
 { //* Middleware
@@ -22,8 +23,22 @@ const db = require('./config/mongoose');
 { //* Routes
   app.use('/scrape', require('./routes/scraper'));
 
-  app.get('/', (req, res) => {
-    res.render('index');
+  app.get('/', async (req, res) => {
+
+    let articles;
+    try {
+      articles = Article.find({});
+    }
+    catch (error) {
+      return res.json(error);
+    }
+
+    console.log((await articles).length);
+    res.render('index',
+      {
+        articles: await articles
+      });
+
   });
 }
 
