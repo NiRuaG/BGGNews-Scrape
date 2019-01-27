@@ -1,21 +1,47 @@
+<style>
+  
+  div[data-note-id] {
+    display: flex;
+    flex-flow: row nowrap;
+  }
+
+  .notesList {
+    display: flex;
+    flex-flow: row wrap;
+  }
+
+</style>
+
+
 <button id="scrape_btn">Scrape</button>
 
 <h1>Articles</h1>
+
 <div>
   {{#each articles}}
     <h3>{{title}}</h3>
     <p>{{summary}}</p>
     <a href="{{link}}">Link to Blog Post</a>
     <br>
-    <div data-id={{postID}}>
+
+    <div data-article-id={{postID}}>
+
       <input type="text" onblur="this.value = this.value.trim()">
       <button class="addNote_btn">Add a Note</button>
+
+      <div class="notesList">
+        {{#each notes}}
+          <div data-note-id={{this._id}}>
+            <p>{{body}}</p>
+            <button class="delNote_btn">X</button>
+          </div>
+        {{else}}
+          <p>There are no Notes for this Article!</p>
+        {{/each}}
+      </div>
+
     </div>
-    {{#each notes}}
-      <p>{{this._id}}</p>
-    {{else}}
-      <p>There are no Notes for this Article!</p>
-    {{/each}}
+
   {{else}}
     <p>There are no Articles!</p>
   {{/each}}
@@ -27,17 +53,22 @@
 
   const $ID = {
     scrape_btn: null,
-  };
+  }
   Object.keys($ID).forEach(id => $ID[id] = document.getElementById(id));
 
   const $CLASS = {
-    addNote_btn: null
-  };
+    addNote_btn: null,
+    delNote_btn: null
+  }
   Object.keys($CLASS).forEach(cl => $CLASS[cl] = document.getElementsByClassName(cl));
 
+  const $DATA = {
+    articleId: 'data-article-id',
+       noteId: 'data-note-id'
+  }
 
   //* scrape button click
-  $ID.scrape_btn.onclick = function ({target}={}) {
+  $ID.scrape_btn.onclick = function ({ target } = {}) {
 
     target.setAttribute('disabled', ""); // will be re-enabled on successful reload
 
@@ -60,45 +91,83 @@
 
 
   //* addNote (class) click
-  const handleAddNote = function ({ target } = {}) {
+  Array.from($CLASS.addNote_btn, v => v.addEventListener('click',
 
-    if (!target) return;
+    function ({ target } = {}) {
 
-    const containingDiv = target.closest('[data-id]');
-    if (!containingDiv) return;
+      if (!target) return;
 
-    const postID = containingDiv.dataset.id;
-    const inputEl = containingDiv.querySelector('input');
+      const articleIdEl = target.closest(`[${$DATA.articleId}]`);
+      if (!articleIdEl) return;
 
-    const body = inputEl && inputEl.value.trim();
-    inputEl.value = body.trim();
+      const postID = articleIdEl.dataset.articleId;
+      const inputEl = articleIdEl.querySelector('input');
 
-    if (!body || !postID) return;
+      const body = inputEl && inputEl.value.trim();
+      inputEl.value = body.trim();
 
-
+      if (!body || !postID) return;
     
 
-    fetch(`/articles/${postID}`,
-      {
-        method: 'POST',
-        body: JSON.stringify({body}),
-        headers: { 'Content-Type': 'application/json' }
-      })
+      fetch(`/articles/${postID}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({body}),
+          headers: { 'Content-Type': 'application/json' }
+        })
 
-      .then(async response => {
-        if (response.ok) {
-          console.log('ok', await response.json());
+        .then(async response => {
+          if (response.ok) {
+            console.log('ok', await response.json());
 
-          {{!-- location.reload(); --}}
-          inputEl.value = "";
-        }
-        else throw response;
-      })
+            {{!-- location.reload(); --}}
+            inputEl.value = "";
+          }
+          else throw response;
+        })
 
-      .catch(error => console.error("fetch /articles POST error", error));
+        .catch(error => console.error("fetch /articles POST error", error));
+    }
 
-  }
+  ));
 
-  Array.from($CLASS.addNote_btn, v => v.addEventListener('click', handleAddNote));
+  //* delNote (class) click
+  Array.from($CLASS.delNote_btn, v => v.addEventListener('click', 
+
+    function ({ target } = {}) {
+      console.log("delnotebtn", target);
+
+      if (!target) return;
+
+      const    noteIdEl = target.closest(`[${$DATA.   noteId}]`);
+      const articleIdEl = target.closest(`[${$DATA.articleId}]`);
+      if (!noteIdEl || !articleIdEl) return;
+
+      const _id = noteIdEl.dataset.noteId;
+      const postID = articleIdEl.dataset.articleId;
+      if (!postID || !_id) return;
+
+
+      fetch(`/notes/${_id}`,
+        {
+          method: 'DELETE',
+          body: JSON.stringify({ postID }),
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        .then(async response => {
+          if (response.ok) {
+            console.log('ok', await response.json());
+
+            {{!-- location.reload(); --}}
+            {{!-- inputEl.value = ""; --}}
+          }
+          else throw response;
+        })
+
+        .catch(error => console.error("fetch /notes/delete error", error));
+    }  
+
+  ));
 
 </script>
