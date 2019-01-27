@@ -22,7 +22,8 @@ const { Article } = require('./models');
 
 { //* Routes
   app.use('/scrape', require('./routes/scraper'));
-
+  app.use('/articles', require('./routes/articles'));
+  
   app.get('/', async (req, res) => {
 
     let articles;
