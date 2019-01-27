@@ -21,30 +21,27 @@ const { Article } = require('./models');
 
 
 { //* Routes
-  app.use('/scrape', require('./routes/scraper'));
+  app.use('/scrape'  , require('./routes/scraper' ));
   app.use('/articles', require('./routes/articles'));
-  
+  app.use('/notes'   , require('./routes/notes'   ));
+
   app.get('/', async (req, res) => {
 
-    let articles;
     try {
-      articles = Article.find({});
+      const articles = await Article.find({}).populate('notes');
+
+      res.render('index', { articles });
     }
+
     catch (error) {
-      return res.json(error);
+      return res.status(500).json(error);
     }
 
-    console.log((await articles).length);
-    res.render('index',
-      {
-        articles: await articles
-      });
-
-  });
+  }); // app.get(=>{})
 }
 
 
-{ //* Star & Listen
+{ //* Start & Listen
   const PORT = process.env.PORT || 3000;
 
   app.listen(PORT, () => {
