@@ -1,32 +1,45 @@
-<button id="scrape">Scrape</button>
+<button id="scrape_btn">Scrape</button>
 
 <h1>Articles</h1>
 <div>
   {{#each articles}}
-  <h3>{{title  }}</h3>
-  <p>{{summary}}</p>
-  <a href="{{link   }}">Link to Blog Post</a>
-    {{#each this.notes}}
-    <p>{{body}}</p>
+    <h3>{{title}}</h3>
+    <p>{{summary}}</p>
+    <a href="{{link}}">Link to Blog Post</a>
+    <br>
+    <div data-id={{postID}}>
+      <input type="text" onblur="this.value = this.value.trim()">
+      <button class="addNote_btn">Add a Note</button>
+    </div>
+    {{#each notes}}
+      <p>{{this._id}}</p>
     {{else}}
-    <p>There are no Notes for this Article!</p>
+      <p>There are no Notes for this Article!</p>
     {{/each}}
   {{else}}
-  <p>There are no Articles!</p>
+    <p>There are no Articles!</p>
   {{/each}}
 </div>
 
 
+
 <script>
 
-  const $IDs = {
-    scrape
-  }
-  Object.keys($IDs).forEach(id => $IDs[id] = document.getElementById(id));
+  const $ID = {
+    scrape_btn: null,
+  };
+  Object.keys($ID).forEach(id => $ID[id] = document.getElementById(id));
+
+  const $CLASS = {
+    addNote_btn: null
+  };
+  Object.keys($CLASS).forEach(cl => $CLASS[cl] = document.getElementsByClassName(cl));
 
 
+  //* scrape button click
+  $ID.scrape_btn.onclick = function ({target}={}) {
 
-  $IDs.scrape.onclick = function (event) {
+    target.setAttribute('disabled', ""); // will be re-enabled on successful reload
 
     fetch('/scrape')
 
@@ -38,8 +51,54 @@
         else throw response;
       })
 
-      .catch(error => console.error("fetch error", error));
+      .catch(error => {
+        target.removeAttribute('disabled');
+        console.error("fetch /scrape error", error)
+      })
+
+  } 
+
+
+  //* addNote (class) click
+  const handleAddNote = function ({ target } = {}) {
+
+    if (!target) return;
+
+    const containingDiv = target.closest('[data-id]');
+    if (!containingDiv) return;
+
+    const postID = containingDiv.dataset.id;
+    const inputEl = containingDiv.querySelector('input');
+
+    const body = inputEl && inputEl.value.trim();
+    inputEl.value = body.trim();
+
+    if (!body || !postID) return;
+
+
+    
+
+    fetch(`/articles/${postID}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({body}),
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      .then(async response => {
+        if (response.ok) {
+          console.log('ok', await response.json());
+
+          {{!-- location.reload(); --}}
+          inputEl.value = "";
+        }
+        else throw response;
+      })
+
+      .catch(error => console.error("fetch /articles POST error", error));
 
   }
+
+  Array.from($CLASS.addNote_btn, v => v.addEventListener('click', handleAddNote));
 
 </script>
