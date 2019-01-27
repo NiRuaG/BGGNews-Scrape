@@ -7,20 +7,21 @@ const { Article } = require('./../models');
 
 router.get('/', (_, res) => {
 
-  axios.get('https://boardgamegeek.com/blog/1/')
+  try {
+    axios.get('https://boardgamegeek.com/blog/1/')
 
-    .then(checkResponseData)
-    .then(parseHTMLData)
-    .then(saveToDB)
-    .then(async (dbPromise) => {
-      res.json(await dbPromise);
-    })
+      .then(checkResponseData, logAxiosError)
+      .then(parseHTMLData)
+      .then(saveToDB)
+      .then(async (dbPromise) => {
+        res.json(await dbPromise);
+      })
+  }
 
-    .catch(error => {
-      console.error("Scrape Error:\n\t", error, "\n\n");
-      if (error !== null) { logAxiosError(error); }
-      res.status(500).send("Internal Scraping Error");
-    }); // axios.get(..)
+  catch (error) {
+    console.error("Scrape Error:\n\t", error, "\n\n");
+    res.status(500).send("Internal Scraping Error");
+  }
 
 });
 
@@ -90,7 +91,7 @@ const saveToDB = (articles) =>
   Promise.all(
     articles.map( (article) => 
       Article.findOneAndUpdate({ postID: article.postID },
-        article,
+        {$set: {...article}},
         { 
           new: true,
           upsert: true,
