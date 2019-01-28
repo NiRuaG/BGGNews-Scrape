@@ -69,7 +69,6 @@ const parseHTMLData = (data) => {
       imgURL = $rightSide.find(".post_fr img").attr('src');
     }
 
-    console.log(imgURL);
 
     return {
       title,
