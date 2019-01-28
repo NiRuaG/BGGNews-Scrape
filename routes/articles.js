@@ -1,39 +1,41 @@
 const router = require('express').Router();
 
 const { Article, Note } = require('./../models');
+const { connection: db } = require('./../config/mongoose');
 
-// router.get('/', (req, res) => {
-//   Article.find({})
-// });
+router.delete('/', async (req, res) => {
+  try {
+    await db.dropDatabase();
+    return res.status(200).json({});
+  }
 
-router.route('/:id')
+  catch (error) {
+    console.log(error);
+    res.status(500).send("Internal Articles deletion Error");
+  }
 
-  //* GET
-  .get((req, res) => {
+});
 
-  })
 
-  //* POST
-  .post( async (req, res) => {
+router.post('/:id', async (req, res) => {
 
-    try {
-      const dbNote = await Note.create(req.body);
+  try {
+    const dbNote = await Note.create(req.body);
 
-      await Article.findOneAndUpdate({ postID: req.params.id },
-        { $push: { notes: dbNote._id }},
-        { new: true }
-      );
+    await Article.findOneAndUpdate({ postID: req.params.id },
+      { $push: { notes: dbNote._id }},
+      { new: true }
+    );
 
-      return res.status(200).json(dbNote.body);
-    }
+    return res.status(200).json(dbNote.body);
+  }
 
-    catch (error) {
-      console.log(error);
-      res.status(500).send("Internal Note saving Error");
-    }
+  catch (error) {
+    console.log(error);
+    res.status(500).send("Internal Note saving Error");
+  }
 
-  })
+});
 
-; // router.route(..)
 
 module.exports = router;

@@ -63,7 +63,7 @@
         </div>
       </div>
     {{else}}
-      <p class="text-center">There are no Articles! Hit the [Scrape] button at the top!</p>
+      <p class="text-center">There are no Articles.  Hit the [Scrape] button at the top!</p>
     {{/each}}
   </div>
 </div>
@@ -89,19 +89,33 @@
        noteId: 'data-note-id'
   }
 
-  const clearArticles = () => {
-    while ($ID.articlesList.firstChild) {
-      $ID.articlesList.removeChild($ID.articlesList.firstChild);
-    }
-  }
 
   //* clear button click
-  $ID.clear_btn.onclick = clearArticles;
+  $ID.clear_btn.onclick = function() {
+
+    fetch(`/articles`,
+      {
+        method: 'DELETE',
+      })
+
+      .then(async response => {
+        if (response.ok) {
+          await response.json();
+
+          location.reload();
+        }
+        else throw response;
+      })
+
+      .catch(async error => console.error("fetch /articles DELETE error", error, error.text && await error.text()));
+  }
 
   //* scrape button click
   $ID.scrape_btn.onclick = function ({ target } = {}) {
     
-    clearArticles();
+    while ($ID.articlesList.firstChild) {
+      $ID.articlesList.removeChild($ID.articlesList.firstChild);
+    }
 
     target.setAttribute('disabled', ""); // will be re-enabled on successful reload
     target.classList.add('disabled');
@@ -117,8 +131,8 @@
         else throw response;
       })
 
-      .catch(error => {
-        console.error("fetch /scrape error", error);
+      .catch(async error => {
+        console.error("fetch /scrape error", error, error.text && await error.text());
         location.reload();
       })
 
@@ -162,7 +176,7 @@
           else throw response;
         })
 
-        .catch(error => console.error("fetch /articles POST error", error));
+        .catch(async error => console.error("fetch /articles POST error", error, error.text && await error.text()));
     }
 
   ));
@@ -200,7 +214,7 @@
           else throw response;
         })
 
-        .catch(error => console.error("fetch /notes/delete error", error));
+        .catch(error => console.error("fetch /notes DELETE error", error));
     }  
 
   ));
