@@ -35,6 +35,13 @@ const ArticleSchema = new Schema({
     unique: true
   },
 
+  imgURL: {
+    type: String,
+    required: true,
+    default: "#",
+    trim: true
+  },
+
   //* `notes` is an array of Note (models)
   notes: [{
     type: Schema.Types.ObjectId,

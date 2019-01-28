@@ -50,34 +50,33 @@ const parseHTMLData = (data) => {
 
     //* postID & link datum
     let postID, link; { 
-      const relLink = $el.find(".post_header .post_title a").attr("href");
+      const relLink = $el.find(".post_header .post_title a").attr('href');
       
       postID = relLink.match(/^\/blogpost\/(.*)\//)[1];
       link = `https://boardgamegeek.com${relLink}`;
     }
 
-    /* //* Date datum
-    // <div class="post_date">
-		// 	<span class="post_day">23</span>
-		// 	<span class="post_month">Jan</span>
-		// 	<span class="post_year">2019</span>
-    // </div> */
-
-    //* Summary datum
-    let summary; { 
+    //* summary & imgURL datum
+    let summary, imgURL; { 
       //% cheerio's text() function does not preserve <br> tags as line breaks (removes them completely instead)
       $el.find('br').replaceWith('\n');
-      summary = $el.find(".post_body .right").text().trim();
+
+      const $rightSide = $el.find(".post_body .right");
       
+      summary = $rightSide.text().trim();
       summary = summary.substring(0, summary.indexOf('\n')); // take the first "paragraph"
+
+      imgURL = $rightSide.find(".post_fr img").attr('src');
     }
 
+    console.log(imgURL);
 
     return {
       title,
       summary,
       link,
-      postID
+      postID,
+      imgURL
     };
 
   }); // results = $(..).map(..
