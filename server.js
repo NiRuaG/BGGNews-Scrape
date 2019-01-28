@@ -6,11 +6,13 @@ const db = require('./config/mongoose');
 const { Article } = require('./models');
 
 
-{ //* Middleware
-  app.use(require('morgan')('dev'));
-  app.use(express.urlencoded({ extended: true }));
-  app.use(express.json());
-}
+//* Middleware
+app.use(
+  require('morgan')('dev'),
+  express.static("public"),
+  express.urlencoded({ extended: true }),
+  express.json()
+);
 
 
 { //* Handlebars = View Engine
