@@ -13,15 +13,22 @@
     max-width: 20%;
     float: left;
   }
+
+  .position-relative .fa-github {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
 </style>
 
 <div id="home" class="bg-light text-dark">
   
 
-  <div class="text-center sticky-top bg-info py-2 border-bottom shadow">
+  <div class="text-center sticky-top bg-info py-2 border-bottom shadow position-relative">
     <button id="scrape_btn" class="btn btn-info"><i class="far fa-newspaper"></i> Scrape</button>
     <button id= "clear_btn" class="btn btn-info"><i class="far fa-trash-alt"></i> Clear</button>
-    <h1 class="text-center noselect">BGG News Articles</h1>
+    <a href="https://github.com/NiRuaG/BGGNews-Scrape"><i class="text-dark fab fa-github fa-lg"></i></a>
+    <h1 class="noselect">BGG News Articles</h1>
   </div>
 
   <div id="articlesList" class="container px-sm-0">
