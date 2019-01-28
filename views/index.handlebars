@@ -3,10 +3,12 @@
   .notesList .btn {
     font-size: small;
   }
+
   .noselect {
     user-select: none;
      -moz-user-select: none;
   }
+
   .card-body img {
     max-width: 20%;
     float: left;
@@ -17,7 +19,8 @@
   
 
   <div class="text-center sticky-top bg-info py-2 border-bottom shadow">
-    <button id="scrape_btn" class="btn btn-info">Scrape</button>
+    <button id="scrape_btn" class="btn btn-info"><i class="far fa-newspaper"></i> Scrape</button>
+    <button id= "clear_btn" class="btn btn-info"><i class="far fa-trash-alt"></i> Clear</button>
     <h1 class="text-center noselect">BGG News Articles</h1>
   </div>
 
@@ -70,6 +73,8 @@
 
   const $ID = {
     scrape_btn: null,
+    clear_btn: null,
+    articlesList: null
   }
   Object.keys($ID).forEach(id => $ID[id] = document.getElementById(id));
 
@@ -84,15 +89,23 @@
        noteId: 'data-note-id'
   }
 
+  const clearArticles = () => {
+    while ($ID.articlesList.firstChild) {
+      $ID.articlesList.removeChild($ID.articlesList.firstChild);
+    }
+  }
+
+  //* clear button click
+  $ID.clear_btn.onclick = clearArticles;
+
   //* scrape button click
   $ID.scrape_btn.onclick = function ({ target } = {}) {
-
-
+    
+    clearArticles();
 
     target.setAttribute('disabled', ""); // will be re-enabled on successful reload
     target.classList.add('disabled');
-    target.classList.remove('btn-info');
-    target.classList.add('btn-dark');
+    target.classList.replace('btn-info', 'btn-dark');
 
     fetch('/scrape')
 
@@ -105,13 +118,11 @@
       })
 
       .catch(error => {
-        target.removeAttribute('disabled');
-        target.classList.remove('btn-dark');
-        target.classList.add('btn-info');
-        console.error("fetch /scrape error", error)
+        console.error("fetch /scrape error", error);
+        location.reload();
       })
 
-  } 
+  }
 
 
   //* addNote submits
@@ -121,7 +132,7 @@
       event.preventDefault();
       const { target } = event;
 
-     if (!target) return;
+      if (!target) return;
 
       const articleIdEl = target.closest(`[${$DATA.articleId}]`);
       if (!articleIdEl) return;
@@ -157,12 +168,10 @@
   ));
 
 
-
   //* delNote (class) click
   Array.from($CLASS.delNote_btn, v => v.addEventListener('click', 
 
     function ({ target } = {}) {
-      console.log("delnotebtn", target);
 
       if (!target) return;
 
