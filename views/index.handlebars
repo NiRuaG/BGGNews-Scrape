@@ -1,52 +1,69 @@
 <style>
-  
-  div[data-note-id] {
-    display: flex;
-    flex-flow: row nowrap;
+  .notesList,
+  .notesList .btn {
+    font-size: small;
   }
-
-  .notesList {
-    display: flex;
-    flex-flow: row wrap;
+  .noselect {
+    user-select: none;
+     -moz-user-select: none;
   }
-
+  .card-body img {
+    max-width: 20%;
+    float: left;
+  }
 </style>
 
+<div id="home" class="bg-light text-dark">
+  
 
-<button id="scrape_btn">Scrape</button>
+  <div class="text-center sticky-top bg-info py-2 border-bottom shadow">
+    <button id="scrape_btn" class="btn btn-info">Scrape</button>
+    <h1 class="text-center noselect">BGG News Articles</h1>
+  </div>
 
-<h1>Articles</h1>
+  <div id="articlesList" class="container px-sm-0">
+    {{#each articles}}
+      <div data-article-id={{postID}} class="row justify-content-center">
+        <div class="card col-12 col-md-9 px-0 my-3 shadow-lg">
+      
+          <div class="card-header bg-dark text-light">{{title}}</div>
+      
+          <div class="card-body py-1">
+            <img src={{imgURL}} class="pr-1" alt="article image">
+      
+            <p class="card-text">{{summary}}</p>
+            <div style="clear: both;"></div>
 
-<div>
-  {{#each articles}}
-    <h3>{{title}}</h3>
-    <p>{{summary}}</p>
-    <a href="{{link}}">Link to Blog Post</a>
-    <br>
-
-    <div data-article-id={{postID}}>
-
-      <input type="text" onblur="this.value = this.value.trim()">
-      <button class="addNote_btn">Add a Note</button>
-
-      <div class="notesList">
-        {{#each notes}}
-          <div data-note-id={{this._id}}>
-            <p>{{body}}</p>
-            <button class="delNote_btn">X</button>
+            <a href={{link}} class="card-link small" target="_blank" rel="noopener noreferrer">
+              Link to Source
+            </a>
+      
+            <div class="notesList d-flex flex-row flex-wrap my-1">
+              {{#each notes}}
+                <div data-note-id={{this._id}} class="d-flex flex-nowrap border border-info rounded mr-2 mb-2 p-1">
+                  <p class="mb-0 px-2">{{body}}</p>
+                  <button class="btn btn-outline-danger p-0 px-1 delNote_btn">&cross;</button>
+                </div>
+              {{else}}
+                <p class="mb-0"><em>There are no Notes for this Article!</em></p>
+              {{/each}}
+            </div>
+      
           </div>
-        {{else}}
-          <p>There are no Notes for this Article!</p>
-        {{/each}}
+
+          <div class="card-footer p-2 bg-info">
+            <form class="addNote_form">
+              <input type="text" class="w-100" placeholder="Add a Note" onblur="this.value = this.value.trim()">
+            </form>
+          </div>
+
+        </div>
       </div>
-
-    </div>
-
-  {{else}}
-    <p>There are no Articles!</p>
-  {{/each}}
+    {{else}}
+      <p class="text-center">There are no Articles! Hit the [Scrape] button at the top!</p>
+    {{/each}}
+  </div>
 </div>
-
 
 
 <script>
@@ -57,8 +74,8 @@
   Object.keys($ID).forEach(id => $ID[id] = document.getElementById(id));
 
   const $CLASS = {
-    addNote_btn: null,
-    delNote_btn: null
+    delNote_btn : null,
+    addNote_form: null
   }
   Object.keys($CLASS).forEach(cl => $CLASS[cl] = document.getElementsByClassName(cl));
 
@@ -70,7 +87,12 @@
   //* scrape button click
   $ID.scrape_btn.onclick = function ({ target } = {}) {
 
+
+
     target.setAttribute('disabled', ""); // will be re-enabled on successful reload
+    target.classList.add('disabled');
+    target.classList.remove('btn-info');
+    target.classList.add('btn-dark');
 
     fetch('/scrape')
 
@@ -84,18 +106,22 @@
 
       .catch(error => {
         target.removeAttribute('disabled');
+        target.classList.remove('btn-dark');
+        target.classList.add('btn-info');
         console.error("fetch /scrape error", error)
       })
 
   } 
 
 
-  //* addNote (class) click
-  Array.from($CLASS.addNote_btn, v => v.addEventListener('click',
+  //* addNote submits
+  Array.from($CLASS.addNote_form, v => v.addEventListener('submit',
 
-    function ({ target } = {}) {
+    function (event) {
+      event.preventDefault();
+      const { target } = event;
 
-      if (!target) return;
+     if (!target) return;
 
       const articleIdEl = target.closest(`[${$DATA.articleId}]`);
       if (!articleIdEl) return;
@@ -118,10 +144,9 @@
 
         .then(async response => {
           if (response.ok) {
-            console.log('ok', await response.json());
-
-            {{!-- location.reload(); --}}
+            await response.json();
             inputEl.value = "";
+            location.reload();
           }
           else throw response;
         })
@@ -130,6 +155,8 @@
     }
 
   ));
+
+
 
   //* delNote (class) click
   Array.from($CLASS.delNote_btn, v => v.addEventListener('click', 
@@ -157,10 +184,9 @@
 
         .then(async response => {
           if (response.ok) {
-            console.log('ok', await response.json());
+            await response.json();
 
-            {{!-- location.reload(); --}}
-            {{!-- inputEl.value = ""; --}}
+            location.reload();
           }
           else throw response;
         })
