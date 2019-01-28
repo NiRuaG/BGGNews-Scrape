@@ -8,8 +8,6 @@ router.delete('/:_id', async (req, res) => {
   const { _id } = req.params;
   const { postID } = req.body;
 
-  console.log(_id, req.body);
-
   try {
     const { ok } = await Note.deleteOne({ _id });
 
