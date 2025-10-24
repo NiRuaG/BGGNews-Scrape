@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/NiRuaG/BGGNews-Scrape#readme",
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^1.8.2",
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.18.2",
     "express-handlebars": "^3.0.0",
