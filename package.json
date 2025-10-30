@@ -28,7 +28,7 @@
     "cheerio": "^1.1.2",
     "express": "^4.20.0",
     "express-handlebars": "^3.0.0",
-    "mongoose": "^5.7.5",
+    "mongoose": "^5.13.23",
     "morgan": "^1.10.1"
   }
 }
